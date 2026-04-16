@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Blood & RBCs — Study App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0b0f17;
+    --surface: #141922;
+    --surface2: #1c2333;
+    --border: #252d3d;
+    --text: #e8edf5;
+    --muted: #6b7a99;
+    --accent: #4f9cf9;
+    --accent2: #38d9a9;
+    --red: #ff6b6b;
+    --green: #38d9a9;
+    --yellow: #ffd43b;
+    --card-h: clamp(220px, 55vw, 340px);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
+
+/* ── TOP BAR ── */
+.topbar {
+background: var(–surface);
+border-bottom: 1px solid var(–border);
+padding: 14px 20px 12px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-shrink: 0;
+}
+.topbar h1 {
+font-family: ‘Syne’, sans-serif;
+font-size: 17px;
+font-weight: 800;
+letter-spacing: -0.3px;
+color: var(–text);
+}
+.topbar h1 span { color: var(–accent); }
+.badge {
+font-size: 11px;
+background: var(–accent);
+color: #fff;
+padding: 3px 9px;
+border-radius: 20px;
+font-weight: 600;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+flex: 1;
+overflow-y: auto;
+overflow-x: hidden;
+-webkit-overflow-scrolling: touch;
+}
+.section { display: none; padding: 16px 16px 80px; }
+.section.active { display: block; }
+
+/* ── BOTTOM NAV ── */
+.bottomnav {
+display: flex;
+background: var(–surface);
+border-top: 1px solid var(–border);
+flex-shrink: 0;
+}
+.navbtn {
+flex: 1;
+padding: 12px 8px;
+background: none;
+border: none;
+color: var(–muted);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 12px;
+font-weight: 500;
+cursor: pointer;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 4px;
+transition: color 0.2s;
+}
+.navbtn.active { color: var(–accent); }
+.navbtn svg { width: 22px; height: 22px; }
+
+/* ── FILTER TABS ── */
+.filter-row {
+display: flex;
+gap: 8px;
+margin-bottom: 16px;
+overflow-x: auto;
+padding-bottom: 4px;
+scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.filter-btn {
+flex-shrink: 0;
+padding: 7px 14px;
+border-radius: 20px;
+border: 1px solid var(–border);
+background: var(–surface);
+color: var(–muted);
+font-size: 13px;
+font-weight: 500;
+cursor: pointer;
+transition: all 0.18s;
+font-family: ‘DM Sans’, sans-serif;
+}
+.filter-btn.active {
+background: var(–accent);
+border-color: var(–accent);
+color: #fff;
+}
+
+/* ── FLASH CARD ── */
+.fc-counter {
+text-align: center;
+font-size: 13px;
+color: var(–muted);
+margin-bottom: 14px;
+font-weight: 500;
+}
+.fc-counter strong { color: var(–accent); }
+.fc-scene {
+width: 100%;
+height: var(–card-h);
+perspective: 1000px;
+cursor: pointer;
+margin-bottom: 16px;
+}
+.fc-card {
+width: 100%;
+height: 100%;
+position: relative;
+transform-style: preserve-3d;
+transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+.fc-card.flipped { transform: rotateY(180deg); }
+.fc-front, .fc-back {
+position: absolute;
+inset: 0;
+border-radius: 16px;
+padding: 24px 22px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+}
+.fc-front {
+background: var(–surface);
+border: 1px solid var(–border);
+}
+.fc-back {
+background: linear-gradient(135deg, #1a2540 0%, #1c2f45 100%);
+border: 1px solid #2a4060;
+transform: rotateY(180deg);
+}
+.fc-tag {
+font-size: 10px;
+letter-spacing: 1px;
+text-transform: uppercase;
+color: var(–accent);
+font-weight: 700;
+margin-bottom: 14px;
+background: rgba(79,156,249,0.1);
+padding: 3px 10px;
+border-radius: 10px;
+align-self: flex-start;
+}
+.fc-question {
+font-size: clamp(14px, 4vw, 17px);
+line-height: 1.55;
+color: var(–text);
+font-weight: 400;
+text-align: center;
+}
+.fc-tap-hint {
+font-size: 11px;
+color: var(–muted);
+margin-top: 16px;
+display: flex;
+align-items: center;
+gap: 5px;
+}
+.fc-answer {
+font-size: clamp(13px, 3.8vw, 16px);
+line-height: 1.6;
+color: var(–accent2);
+font-weight: 500;
+text-align: center;
+}
+.fc-answer-label {
+font-size: 10px;
+letter-spacing: 1px;
+color: var(–accent2);
+text-transform: uppercase;
+font-weight: 700;
+margin-bottom: 12px;
+opacity: 0.7;
+}
+
+.fc-controls {
+display: flex;
+gap: 10px;
+justify-content: center;
+margin-bottom: 14px;
+}
+.fc-btn {
+flex: 1;
+max-width: 130px;
+padding: 11px;
+border-radius: 12px;
+border: 1px solid var(–border);
+background: var(–surface);
+color: var(–text);
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.18s;
+font-family: ‘DM Sans’, sans-serif;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 6px;
+}
+.fc-btn:hover { background: var(–surface2); border-color: var(–accent); }
+.fc-btn.primary { background: var(–accent); border-color: var(–accent); color: #fff; }
+
+.fc-shuffle-row {
+display: flex;
+justify-content: center;
+gap: 10px;
+}
+.fc-small-btn {
+padding: 8px 16px;
+border-radius: 10px;
+border: 1px solid var(–border);
+background: none;
+color: var(–muted);
+font-size: 12px;
+font-weight: 500;
+cursor: pointer;
+font-family: ‘DM Sans’, sans-serif;
+transition: all 0.18s;
+display: flex;
+align-items: center;
+gap: 5px;
+}
+.fc-small-btn:hover { color: var(–text); border-color: var(–text); }
+
+/* ── QUIZ ── */
+.quiz-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 14px;
+}
+.quiz-progress-bar {
+height: 4px;
+background: var(–surface2);
+border-radius: 4px;
+margin-bottom: 16px;
+overflow: hidden;
+}
+.quiz-progress-fill {
+height: 100%;
+background: var(–accent);
+border-radius: 4px;
+transition: width 0.3s ease;
+}
+.quiz-score-chip {
+font-size: 13px;
+font-weight: 600;
+color: var(–accent2);
+background: rgba(56,217,169,0.1);
+padding: 4px 12px;
+border-radius: 20px;
+}
+.quiz-q-num {
+font-size: 13px;
+color: var(–muted);
+font-weight: 500;
+}
+.quiz-type-badge {
+font-size: 10px;
+padding: 3px 9px;
+border-radius: 10px;
+font-weight: 700;
+letter-spacing: 0.5px;
+text-transform: uppercase;
+}
+.quiz-type-badge.tf { background: rgba(255,212,59,0.15); color: var(–yellow); }
+.quiz-type-badge.mcq { background: rgba(79,156,249,0.15); color: var(–accent); }
+
+.quiz-card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 20px 18px;
+margin-bottom: 14px;
+}
+.quiz-question {
+font-size: clamp(14px, 4vw, 16px);
+line-height: 1.6;
+color: var(–text);
+margin-bottom: 18px;
+font-weight: 400;
+}
+.quiz-options {
+display: flex;
+flex-direction: column;
+gap: 9px;
+}
+.quiz-opt {
+padding: 12px 14px;
+border-radius: 11px;
+border: 1px solid var(–border);
+background: var(–surface2);
+color: var(–text);
+font-size: 14px;
+font-weight: 400;
+cursor: pointer;
+text-align: left;
+transition: all 0.18s;
+font-family: ‘DM Sans’, sans-serif;
+line-height: 1.45;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+}
+.quiz-opt:hover { border-color: var(–accent); }
+.quiz-opt.correct { background: rgba(56,217,169,0.12); border-color: var(–green); color: var(–green); }
+.quiz-opt.wrong { background: rgba(255,107,107,0.1); border-color: var(–red); color: var(–red); }
+.quiz-opt.show-correct { background: rgba(56,217,169,0.08); border-color: var(–green); color: var(–green); }
+.quiz-opt .opt-label {
+font-weight: 700;
+font-size: 13px;
+flex-shrink: 0;
+margin-top: 1px;
+opacity: 0.6;
+}
+.quiz-opt.correct .opt-label,
+.quiz-opt.wrong .opt-label,
+.quiz-opt.show-correct .opt-label { opacity: 1; }
+.quiz-opt[disabled] { cursor: default; }
+
+.quiz-explanation {
+margin-top: 13px;
+padding: 12px 14px;
+background: rgba(79,156,249,0.07);
+border: 1px solid rgba(79,156,249,0.2);
+border-radius: 10px;
+font-size: 13px;
+color: var(–muted);
+line-height: 1.55;
+display: none;
+}
+.quiz-explanation.visible { display: block; }
+.quiz-explanation strong { color: var(–accent); }
+
+.quiz-next-btn {
+width: 100%;
+padding: 13px;
+border-radius: 12px;
+border: none;
+background: var(–accent);
+color: #fff;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+font-family: ‘DM Sans’, sans-serif;
+transition: opacity 0.18s;
+display: none;
+}
+.quiz-next-btn.visible { display: block; }
+.quiz-next-btn:hover { opacity: 0.88; }
+
+/* TF Buttons */
+.tf-buttons {
+display: flex;
+gap: 10px;
+}
+.tf-btn {
+flex: 1;
+padding: 14px;
+border-radius: 12px;
+border: 1px solid var(–border);
+background: var(–surface2);
+color: var(–text);
+font-size: 16px;
+font-weight: 700;
+cursor: pointer;
+font-family: ‘DM Sans’, sans-serif;
+transition: all 0.18s;
+}
+.tf-btn.true-btn:hover { background: rgba(56,217,169,0.1); border-color: var(–green); }
+.tf-btn.false-btn:hover { background: rgba(255,107,107,0.1); border-color: var(–red); }
+.tf-btn.correct { background: rgba(56,217,169,0.15); border-color: var(–green); color: var(–green); }
+.tf-btn.wrong { background: rgba(255,107,107,0.12); border-color: var(–red); color: var(–red); }
+.tf-btn[disabled] { cursor: default; }
+
+/* Result screen */
+.quiz-result {
+display: none;
+text-align: center;
+padding: 30px 20px;
+}
+.quiz-result.visible { display: block; }
+.result-score {
+font-family: ‘Syne’, sans-serif;
+font-size: 64px;
+font-weight: 800;
+line-height: 1;
+color: var(–accent);
+margin: 16px 0 8px;
+}
+.result-label {
+font-size: 14px;
+color: var(–muted);
+margin-bottom: 24px;
+}
+.result-stats {
+display: flex;
+gap: 10px;
+justify-content: center;
+margin-bottom: 28px;
+}
+.stat-chip {
+padding: 8px 16px;
+border-radius: 12px;
+font-size: 14px;
+font-weight: 600;
+}
+.stat-chip.green { background: rgba(56,217,169,0.12); color: var(–green); }
+.stat-chip.red { background: rgba(255,107,107,0.12); color: var(–red); }
+.restart-btn {
+padding: 13px 32px;
+border-radius: 12px;
+border: none;
+background: var(–accent);
+color: #fff;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+font-family: ‘DM Sans’, sans-serif;
+}
+
+/* start screen */
+.quiz-start {
+text-align: center;
+padding: 20px 0;
+}
+.quiz-start h2 {
+font-family: ‘Syne’, sans-serif;
+font-size: 22px;
+font-weight: 700;
+margin-bottom: 8px;
+}
+.quiz-start p {
+color: var(–muted);
+font-size: 14px;
+margin-bottom: 24px;
+line-height: 1.55;
+}
+.start-options {
+display: flex;
+flex-direction: column;
+gap: 10px;
+max-width: 320px;
+margin: 0 auto 20px;
+}
+.start-opt-btn {
+padding: 16px 18px;
+border-radius: 13px;
+border: 1px solid var(–border);
+background: var(–surface);
+color: var(–text);
+text-align: left;
+cursor: pointer;
+font-family: ‘DM Sans’, sans-serif;
+transition: all 0.2s;
+}
+.start-opt-btn:hover { border-color: var(–accent); background: var(–surface2); }
+.start-opt-btn .sot { font-size: 15px; font-weight: 600; display: block; margin-bottom: 3px; }
+.start-opt-btn .son { font-size: 12px; color: var(–muted); }
+
+/* scrollbar */
+.main::-webkit-scrollbar { width: 4px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(–border); border-radius: 4px; }
+
+@media (min-width: 480px) {
+.fc-controls { max-width: 320px; margin: 0 auto 14px; }
+.start-options { gap: 12px; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Blood <span>&</span> RBCs</h1>
+  <span class="badge" id="sectionBadge">Flash Cards</span>
+</div>
+
+<div class="main">
+
+  <!-- ════════════ FLASH CARDS SECTION ════════════ -->
+
+  <div class="section active" id="section-fc">
+    <div class="filter-row" id="fcFilter">
+      <button class="filter-btn active" onclick="setFCFilter('all')">All (130)</button>
+      <button class="filter-btn" onclick="setFCFilter('blood')">🩸 Blood (30)</button>
+      <button class="filter-btn" onclick="setFCFilter('rbc')">🔴 RBCs (100)</button>
+    </div>
+
+```
+<div class="fc-counter">
+  Card <strong id="fcCurrent">1</strong> of <strong id="fcTotal">130</strong>
+</div>
+
+<div class="fc-scene" id="fcScene" onclick="flipCard()">
+  <div class="fc-card" id="fcCard">
+    <div class="fc-front">
+      <div class="fc-tag" id="fcTag">BLOOD</div>
+      <p class="fc-question" id="fcQuestion">Loading...</p>
+      <p class="fc-tap-hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 18l6-6-6-6"/></svg>
+        Tap to reveal answer
+      </p>
+    </div>
+    <div class="fc-back">
+      <p class="fc-answer-label">Answer</p>
+      <p class="fc-answer" id="fcAnswer">—</p>
+    </div>
+  </div>
+</div>
+
+<div class="fc-controls">
+  <button class="fc-btn" onclick="prevCard()">← Prev</button>
+  <button class="fc-btn primary" onclick="nextCard()">Next →</button>
+</div>
+
+<div class="fc-shuffle-row">
+  <button class="fc-small-btn" onclick="shuffleCards()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+    Shuffle
+  </button>
+  <button class="fc-small-btn" onclick="resetCards()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+    Reset
+  </button>
+</div>
+```
+
+  </div>
+
+  <!-- ════════════ QUIZ SECTION ════════════ -->
+
+  <div class="section" id="section-quiz">
+
+```
+<!-- Start Screen -->
+<div id="quizStart" class="quiz-start">
+  <h2>Quiz Mode</h2>
+  <p>Test yourself with 70 questions from Dr. Najat's sheet — True/False & MCQ.</p>
+  <div class="start-options">
+    <button class="start-opt-btn" onclick="startQuiz('all')">
+      <span class="sot">Full Quiz</span>
+      <span class="son">All 70 questions (T/F + MCQ)</span>
+    </button>
+    <button class="start-opt-btn" onclick="startQuiz('tf')">
+      <span class="sot">True / False Only</span>
+      <span class="son">35 questions</span>
+    </button>
+    <button class="start-opt-btn" onclick="startQuiz('mcq')">
+      <span class="sot">MCQ Only</span>
+      <span class="son">35 questions</span>
+    </button>
+  </div>
+</div>
+
+<!-- Active Quiz -->
+<div id="quizActive" style="display:none;">
+  <div class="quiz-header">
+    <span class="quiz-q-num" id="qNum">Q1 / 70</span>
+    <span class="quiz-score-chip" id="qScore">✓ 0</span>
+  </div>
+  <div class="quiz-progress-bar">
+    <div class="quiz-progress-fill" id="qProgress" style="width:0%"></div>
+  </div>
+  <div class="quiz-card">
+    <span class="quiz-type-badge" id="qTypeBadge">T/F</span>
+    <p class="quiz-question" id="qQuestion" style="margin-top:10px;">—</p>
+    <div class="quiz-options" id="qOptions"></div>
+    <div class="quiz-explanation" id="qExplanation"></div>
+  </div>
+  <button class="quiz-next-btn" id="qNextBtn" onclick="nextQuestion()">Next Question →</button>
+</div>
+
+<!-- Result Screen -->
+<div id="quizResult" class="quiz-result">
+  <p style="color:var(--muted);font-size:13px;">Your Score</p>
+  <div class="result-score" id="rScore">0%</div>
+  <p class="result-label" id="rLabel">—</p>
+  <div class="result-stats">
+    <div class="stat-chip green" id="rCorrect">✓ 0 Correct</div>
+    <div class="stat-chip red" id="rWrong">✗ 0 Wrong</div>
+  </div>
+  <button class="restart-btn" onclick="restartQuiz()">Try Again</button>
+</div>
+```
+
+  </div>
+</div>
+
+<nav class="bottomnav">
+  <button class="navbtn active" id="nav-fc" onclick="showSection('fc')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+    Flash Cards
+  </button>
+  <button class="navbtn" id="nav-quiz" onclick="showSection('quiz')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    Quiz
+  </button>
+</nav>
+
+<script>
+/* ═══════════════════════════════════════════════
+   FLASH CARD DATA
+═══════════════════════════════════════════════ */
+const CARDS = [
+  // ── BLOOD (30) ──
+  {cat:'blood',q:'What type of tissue is blood?',a:'Fluid connective tissue — considered the "fluid of life"'},
+  {cat:'blood',q:'Normal blood volume in adult male / female / newborn?',a:'Male: 5 L | Female: ~4.5 L | Newborn: 450 mL'},
+  {cat:'blood',q:'Blood is what % of body weight?',a:'~8% (in a 70 kg adult)'},
+  {cat:'blood',q:'Normal blood pH?',a:'7.4 — slightly alkaline'},
+  {cat:'blood',q:'Blood is how many times more viscous than water? Why?',a:'5 times — mainly due to RBCs and plasma proteins'},
+  {cat:'blood',q:'Specific gravity of whole blood?',a:'1.052–1.061'},
+  {cat:'blood',q:'What are the formed elements of blood?',a:'RBCs (erythrocytes), WBCs (leukocytes), Platelets (thrombocytes)'},
+  {cat:'blood',q:'What is plasma? Composition?',a:'Straw-colored clear liquid: 91–92% water, 8–9% solids (organic + inorganic)'},
+  {cat:'blood',q:'What is serum?',a:'Plasma − Fibrinogen; the clear fluid that oozes from a clot after ~45 minutes'},
+  {cat:'blood',q:'How is serum separated clinically?',a:'By centrifugation'},
+  {cat:'blood',q:'Volume of serum relative to plasma?',a:'Almost equal — ~55%'},
+  {cat:'blood',q:'Three plasma proteins?',a:'1. Albumin  2. Globulin  3. Fibrinogen'},
+  {cat:'blood',q:'Normal total plasma proteins?',a:'6.4–8.3 g/dL (average 7.3)'},
+  {cat:'blood',q:'Normal values: Albumin / Globulin / Fibrinogen?',a:'Albumin: 4.7 | Globulin: 2.3 | Fibrinogen: 0.3 g/dL'},
+  {cat:'blood',q:'Normal A/G ratio and clinical significance?',a:'2:1 — indicator of liver and kidney disease'},
+  {cat:'blood',q:'Three types of globulin?',a:'α-globulin, β-globulin, γ-globulin'},
+  {cat:'blood',q:'Where are plasma proteins synthesized in adults?',a:'Reticuloendothelial cells of liver; also spleen, bone marrow. γ-globulin → B lymphocytes'},
+  {cat:'blood',q:'Hyperproteinemia vs Hypoproteinemia?',a:'Elevation vs Decrease of all plasma protein fractions'},
+  {cat:'blood',q:'What is colloidal osmotic (oncotic) pressure? Normal value?',a:'~25 mmHg; exerted by plasma proteins, mainly Albumin'},
+  {cat:'blood',q:'Molecular weights of plasma proteins?',a:'Fibrinogen: 400,000 > Globulin: 156,000 > Albumin: 69,000'},
+  {cat:'blood',q:'Plasma proteins contribute what fraction of total blood buffering?',a:'1/6 of total blood buffering action'},
+  {cat:'blood',q:'Which protein is essential for blood coagulation?',a:'Fibrinogen'},
+  {cat:'blood',q:'Which proteins act as antibodies / immunoglobulins?',a:'γ-globulins'},
+  {cat:'blood',q:'Which proteins transport hormones, enzymes, metals?',a:'Albumin, α & β globulins (α/β specifically transport metals)'},
+  {cat:'blood',q:'What accelerates rouleaux formation and ESR?',a:'Globulin and Fibrinogen'},
+  {cat:'blood',q:'Trephone substance — source and function?',a:'Produced by leukocytes from plasma proteins; nourishes tissue cells in culture'},
+  {cat:'blood',q:'9 Functions of blood?',a:'Nutrient, Respiratory, Excretory, Transport (hormones/enzymes), Water balance, Acid-base balance, Temperature regulation, Storage, Defensive'},
+  {cat:'blood',q:'How does blood regulate body temperature?',a:'High specific heat → maintains thermoregulatory balance between heat loss and heat gain'},
+  {cat:'blood',q:'Arterial vs Venous blood color?',a:'Arterial = scarlet red (more O₂) | Venous = purple-red (more CO₂)'},
+  {cat:'blood',q:'Composition of blood — two main parts?',a:'Blood cells (formed elements) + Plasma (liquid portion)'},
+
+  // ── RBCs — BASIC (30) ──
+  {cat:'rbc',q:'Another name for RBCs?',a:'Erythrocytes'},
+  {cat:'rbc',q:'RBCs are what type of formed elements?',a:'Non-nucleated — no nucleus, no mitochondria, no Golgi apparatus'},
+  {cat:'rbc',q:'What gives RBCs their red color?',a:'Hemoglobin'},
+  {cat:'rbc',q:'Normal RBC count in adult male / female?',a:'Male: 5 million/cu mm | Female: 4.5 million/cu mm'},
+  {cat:'rbc',q:'RBC count at birth?',a:'3–10 million/cu mm; decreases within 10 days due to RBC destruction'},
+  {cat:'rbc',q:'Shape of RBCs?',a:'Biconcave disk (dumbbell shaped)'},
+  {cat:'rbc',q:'Which part of RBC is thicker — center or periphery?',a:'Periphery (2.2 µ); center is thinner (1 µ) due to biconcave shape'},
+  {cat:'rbc',q:'Diameter / Surface area / Volume of RBC?',a:'Diameter: 7.2 µ | Surface area: 120 sq µ | Volume: 85–90 cu µ'},
+  {cat:'rbc',q:'How does RBC produce energy? Why?',a:'Glycolytic process — no mitochondria present'},
+  {cat:'rbc',q:'4 Advantages of biconcave shape?',a:'1. Rapid O₂ diffusion  2. Large surface area  3. Minimal membrane tension  4. Squeeze through capillaries easily'},
+
+  // ── RBCs — PROPERTIES (10) ──
+  {cat:'rbc',q:'What is rouleaux formation?',a:'RBCs pile up like coins when removed from vessel; accelerated by globulin & fibrinogen'},
+  {cat:'rbc',q:'Specific gravity of RBCs?',a:'1.092–1.101'},
+  {cat:'rbc',q:'What is PCV/Hematocrit?',a:'Volume of RBCs as % of blood — Normal: male 40–45%, female 38–42%, plasma 55%'},
+  {cat:'rbc',q:'PCV increases in? Decreases in?',a:'Increases: polycythemia, dehydration | Decreases: anemia, cirrhosis, pregnancy'},
+  {cat:'rbc',q:'What is suspension stability of RBCs?',a:'RBCs remain suspended uniformly in blood during circulation'},
+
+  // ── RBCs — LIFESPAN & DESTRUCTION (10) ──
+  {cat:'rbc',q:'Average lifespan of RBC?',a:'120 days'},
+  {cat:'rbc',q:'Where are old (senile) RBCs destroyed?',a:'Reticuloendothelial system — mainly spleen capillaries (very narrow)'},
+  {cat:'rbc',q:'Fate of iron after RBC destruction?',a:'Iron + apoferritin → ferritin → stored and reused'},
+  {cat:'rbc',q:'Fate of globin after RBC destruction?',a:'Enters the protein depot for later use'},
+  {cat:'rbc',q:'Fate of porphyrin after RBC destruction?',a:'Degraded → bilirubin → excreted by liver through bile'},
+  {cat:'rbc',q:'Daily % of RBCs destroyed in healthy adults?',a:'10% daily; releases ~0.6 g/dL hemoglobin → 0.9–1.5 mg/dL bilirubin formed'},
+
+  // ── RBCs — FUNCTIONS (5) ──
+  {cat:'rbc',q:'Hb + O₂ forms what compound?',a:'Oxyhemoglobin — carries O₂ from lungs to tissues'},
+  {cat:'rbc',q:'Hb + CO₂ forms what compound?',a:'Carbhemoglobin — carries CO₂ from tissues to lungs'},
+  {cat:'rbc',q:'Role of RBCs in acid-base balance?',a:'Hemoglobin acts as a buffer, regulating H⁺ concentration'},
+  {cat:'rbc',q:'Role of RBCs in blood group determination?',a:'Carry A, B antigens and Rh factor on their surface'},
+
+  // ── RBCs — ERYTHROPOIESIS (15) ──
+  {cat:'rbc',q:'Definition of erythropoiesis?',a:'Process of origin, development, and maturation of all blood cells'},
+  {cat:'rbc',q:'Mesoblastic stage — when and where?',a:'1st trimester (first 2–3 months) — yolk sac mesenchymal cells'},
+  {cat:'rbc',q:'Hepatic stage — when and where?',a:'2nd trimester (next 3 months) — mainly liver, also spleen'},
+  {cat:'rbc',q:'Myeloid stage — when and where?',a:'3rd trimester (last 3 months) — red bone marrow + liver'},
+  {cat:'rbc',q:'RBC production site up to age 20 / after age 20?',a:'<20: all bones | >20: membranous bones + ends of long bones'},
+  {cat:'rbc',q:'6 Stages of erythropoiesis in order?',a:'Proerythroblast → Early normoblast → Intermediate normoblast → Late normoblast → Reticulocyte → Matured erythrocyte'},
+  {cat:'rbc',q:'Time from proerythroblast to mature RBC?',a:'7 days'},
+  {cat:'rbc',q:'4 Changes during RBC maturation?',a:'Size ↓ (25→7.2 µ), nucleus disappears, hemoglobin appears, cytoplasm staining changes'},
+  {cat:'rbc',q:'What is a reticulocyte?',a:'Immature RBC — slightly larger, has reticular network from disintegrated organelles'},
+  {cat:'rbc',q:'Reticulocyte count: newborns vs adults?',a:'Newborns: 2–6% | Adults: ≤1%'},
+  {cat:'rbc',q:'Main stimulus for erythropoiesis?',a:'Hypoxia → kidney → erythropoietin → bone marrow → more RBCs'},
+  {cat:'rbc',q:'Where is erythropoietin secreted?',a:'Mainly kidneys; small amount from liver and brain'},
+  {cat:'rbc',q:'Hematopoietic growth factors?',a:'Interleukins 3, 6, 11 and stem cell factor (steel factor)'},
+  {cat:'rbc',q:'Vitamins needed for erythropoiesis?',a:'A, B, C, D, E — deficiency causes anemia'},
+  {cat:'rbc',q:'Maturation factors for RBCs (3)?',a:'1. Vitamin B12 (Cyanocobalamin)  2. Intrinsic Factor  3. Folic Acid'},
+
+  // ── RBCs — HEMOGLOBIN (15) ──
+  {cat:'rbc',q:'What is hemoglobin?',a:'Iron-containing coloring pigment of RBC; 95% dry weight, 30–34% wet weight'},
+  {cat:'rbc',q:'Normal Hb content (by age)?',a:'Birth: 25 g/dL → 3rd month: 20 → 1 year: 17 → Puberty+: 14–16 g/dL'},
+  {cat:'rbc',q:'Structure of hemoglobin?',a:'Conjugated protein = globin (protein) + heme (iron-containing pigment = porphyrin/tetrapyrrole)'},
+  {cat:'rbc',q:'Iron form in hemoglobin?',a:'Ferrous (Fe²⁺) — unstable form'},
+  {cat:'rbc',q:'Globin chain composition in adult Hb (HbA)?',a:'2 α-chains + 2 β-chains'},
+  {cat:'rbc',q:'Fetal Hb (HbF) chains?',a:'2 α-chains + 2 γ-chains; has MORE affinity for O₂ than HbA'},
+  {cat:'rbc',q:'Where is heme synthesized? From what?',a:'Mitochondria; from succinyl-CoA + glycine'},
+  {cat:'rbc',q:'Where is globin synthesized?',a:'Ribosomes'},
+  {cat:'rbc',q:'Carboxyhemoglobin — how formed? Danger?',a:'Hb + CO; Hb has 200× more affinity for CO than O₂ → tissue hypoxia'},
+  {cat:'rbc',q:'CO poisoning — Hb saturation levels and effects?',a:'<20%: headache/nausea | 30–40%: convulsions, coma | >50%: death'},
+  {cat:'rbc',q:'Methemoglobin (ferrihemoglobin)?',a:'Fe²⁺ oxidized to Fe³⁺; caused by nitrites, nitrates, nitrous oxide; normal <3% of total Hb'},
+  {cat:'rbc',q:'Sulfhemoglobin?',a:'Hb + H₂S; caused by sulfonamides; normal <1% of total Hb; irreversible'},
+  {cat:'rbc',q:'Vitamin B12 (Cyanocobalamin) — functions and deficiency?',a:'Extrinsic factor; essential for DNA synthesis, cell division; absorbed via intrinsic factor; deficiency → pernicious anemia'},
+  {cat:'rbc',q:'Intrinsic factor — source and function?',a:'Parietal cells of gastric glands; essential for B12 absorption; absence → pernicious anemia'},
+  {cat:'rbc',q:'Folic acid deficiency?',a:'Defective DNA synthesis → cells remain megaloblastic → megaloblastic anemia'},
+
+  // ── RBCs — ESR (5) ──
+  {cat:'rbc',q:'What is ESR?',a:'Rate at which erythrocytes settle in a vertical tube (mm/hour) when blood + anticoagulant is left undisturbed'},
+  {cat:'rbc',q:'ESR — physiological variations?',a:'Higher in females; increases in menstruation, pregnancy (up to 35 mm/hr); lower in children'},
+  {cat:'rbc',q:'ESR increases pathologically in?',a:'Tuberculosis, all anemias EXCEPT sickle cell, malignant tumors, rheumatoid arthritis'},
+  {cat:'rbc',q:'ESR does NOT increase in?',a:'Sickle cell anemia — the classic exception'},
+  {cat:'rbc',q:'Clinical uses of PCV determination?',a:'Diagnose anemia/polycythemia, assess dehydration severity, decide blood transfusion'},
+
+  // ── RBCs — POLYCYTHEMIA (5) ──
+  {cat:'rbc',q:'Physiological causes of RBC increase (polycythemia)?',a:'High altitude, muscular exercise, emotional stress, increased temperature, after meals, sex differences, neonatal period'},
+  {cat:'rbc',q:'High altitude → polycythemia mechanism?',a:'Hypoxia → kidney → erythropoietin → bone marrow → ↑ RBCs'},
+  {cat:'rbc',q:'Pathological polycythemia — definition and RBC count?',a:'Abnormal increase >7 million/cu mm; Primary (vera): >14 million + WBC >24,000 — from bone marrow malignancy'},
+  {cat:'rbc',q:'Secondary polycythemia — causes?',a:'Emphysema, congenital heart disease, CO poisoning, chemicals (phosphorus, arsenic), repeated hemorrhage — all via hypoxia'},
+  {cat:'rbc',q:'Physiological decrease in RBC count?',a:'High barometric pressure (deep sea), during sleep, pregnancy (hemodilution)'},
+
+  // ── RBCs — ANEMIA & VARIATIONS (10) ──
+  {cat:'rbc',q:'Definition of anemia?',a:'Abnormal decrease in RBC count, Hb content, or PCV'},
+  {cat:'rbc',q:'Most common type of anemia? RBC morphology?',a:'Iron deficiency anemia → microcytic hypochromic RBCs'},
+  {cat:'rbc',q:'Pernicious (Addison\'s) anemia — cause and RBCs?',a:'Vitamin B12 deficiency → macrocytic normochromic/hypochromic RBCs'},
+  {cat:'rbc',q:'Aplastic anemia — cause and RBCs?',a:'Bone marrow disorder; red marrow replaced by fatty tissue → normocytic normochromic'},
+  {cat:'rbc',q:'Sickle cell anemia?',a:'Inherited; HbSS; normal α + abnormal β chains → crescentic, fragile RBCs; common in African origin'},
+  {cat:'rbc',q:'Thalassemia?',a:'Inherited; unequal α/β chains → defective RBCs; β-thalassemia most common; also called Cooley\'s / Mediterranean anemia; common in Thailand'},
+  {cat:'rbc',q:'Morphological classification of anemia (4 types)?',a:'Normocytic normochromic | Normocytic hypochromic | Macrocytic hypochromic | Microcytic hypochromic'},
+  {cat:'rbc',q:'Crenation vs Spherocytosis?',a:'Crenation = shrinkage (hypertonic) | Spherocytosis = globular/swollen (hypotonic)'},
+  {cat:'rbc',q:'Poikilocytosis?',a:'Unusual shapes (flask, hammer) due to deformed cell membrane'},
+  {cat:'rbc',q:'Hemolysis — definition and types of fragility?',a:'Rupture of RBCs with release of Hb. Osmotic fragility (hypotonic saline) | Mechanical fragility (trauma)'},
+];
+
+/* ═══════════════════════════════════════════════
+   QUIZ DATA
+═══════════════════════════════════════════════ */
+const QUIZ_DATA = [
+  // T/F (35)
+  {type:'tf',q:'Red blood cells are also called erythrocytes.',ans:true,exp:'RBCs = erythrocytes, the non-nucleated formed elements carrying hemoglobin.'},
+  {type:'tf',q:'Mature RBCs contain a nucleus.',ans:false,exp:'The nucleus disappears during maturation. Mature RBCs are non-nucleated.'},
+  {type:'tf',q:'The red color of RBCs is due to the presence of hemoglobin.',ans:true,exp:'Hemoglobin is the iron-containing pigment responsible for the red color.'},
+  {type:'tf',q:'In adult males, the RBC count is 5 million/cu mm.',ans:true,exp:'Males: 5 million/cu mm. Females: 4.5 million/cu mm.'},
+  {type:'tf',q:'The central portion of an RBC is thicker than the periphery.',ans:false,exp:'Center is THINNER (1 µ); periphery is THICKER (2.2 µ) due to the biconcave shape.'},
+  {type:'tf',q:'The diameter of a mature RBC is 7.2 µ.',ans:true,exp:'Normal diameter range is 6.9–7.4 µ, average 7.2 µ.'},
+  {type:'tf',q:'RBCs produce energy via the glycolytic process.',ans:true,exp:'No mitochondria in mature RBCs → energy comes entirely from glycolysis.'},
+  {type:'tf',q:'Mitochondria are present inside mature RBCs.',ans:false,exp:'Mitochondria AND Golgi apparatus are both absent in mature RBCs.'},
+  {type:'tf',q:'The normal lifespan of an RBC is approximately 120 days.',ans:true,exp:'After 120 days the membrane becomes fragile and the cell is destroyed in the spleen.'},
+  {type:'tf',q:'Senile (old) RBCs are destroyed in the reticuloendothelial system.',ans:true,exp:'Mainly in the narrow capillaries of the spleen within the reticuloendothelial system.'},
+  {type:'tf',q:'Destruction of RBCs occurs mainly in the capillaries of the liver.',ans:false,exp:'RBC destruction occurs mainly in the SPLEEN capillaries, which are very narrow.'},
+  {type:'tf',q:'Iron combines with apoferritin to form ferritin, which is stored and reused.',ans:true,exp:'Iron → apoferritin + iron = ferritin, stored in body and recycled for new Hb.'},
+  {type:'tf',q:'Porphyrin (from hemoglobin breakdown) is degraded into bilirubin.',ans:true,exp:'Porphyrin → bilirubin → excreted by liver through bile.'},
+  {type:'tf',q:'Bilirubin is excreted by the kidneys.',ans:false,exp:'Bilirubin is excreted by the LIVER through bile, not kidneys.'},
+  {type:'tf',q:'Rouleaux formation is accelerated by plasma proteins globulin and fibrinogen.',ans:true,exp:'Globulin and fibrinogen accelerate rouleaux (coin-pile) formation.'},
+  {type:'tf',q:'Hematocrit (PCV) value represents 45% of blood volume in normal adults.',ans:true,exp:'Normal PCV ≈ 45% (40–45% males, 38–42% females). Plasma = 55%.'},
+  {type:'tf',q:'Polycythemia vera is characterized by persistent RBC count above 14 million/cu mm.',ans:true,exp:'Polycythemia vera (primary): RBC >14 million/cu mm + WBC >24,000/cu mm from bone marrow malignancy.'},
+  {type:'tf',q:'High altitude increases RBC count due to hypoxia stimulating erythropoietin secretion.',ans:true,exp:'Hypoxia → kidney → erythropoietin → bone marrow → more RBCs produced.'},
+  {type:'tf',q:'RBC count decreases during pregnancy due to hemodilution.',ans:true,exp:'Increased ECF volume → increased plasma volume → hemodilution → relative ↓ in RBC count.'},
+  {type:'tf',q:'Fetal hemoglobin (HbF) has less affinity for oxygen than adult hemoglobin (HbA).',ans:false,exp:'HbF has MORE affinity for O₂ than HbA — helps the fetus extract O₂ from maternal blood.'},
+  {type:'tf',q:'Methemoglobin is formed when iron in Hb is oxidized from ferrous (Fe²⁺) to ferric (Fe³⁺) state.',ans:true,exp:'Methemoglobin = ferrihemoglobin; normal level <3% of total Hb.'},
+  {type:'tf',q:'Carbon monoxide has 200 times more affinity for hemoglobin than oxygen.',ans:true,exp:'This makes CO extremely dangerous — it blocks O₂ transport causing tissue hypoxia.'},
+  {type:'tf',q:'Death from carbon monoxide poisoning occurs when Hb saturation exceeds 50%.',ans:true,exp:'<20%: mild symptoms | 30–40%: convulsions/coma | >50%: death.'},
+  {type:'tf',q:'Normal methemoglobin level is less than 3% of total hemoglobin.',ans:true,exp:'Normal methemoglobin: <3% of total Hb. Caused by nitrites, nitrates, nitrous oxide.'},
+  {type:'tf',q:'Vitamin B12 (cyanocobalamin) is also called the extrinsic factor.',ans:true,exp:'Called extrinsic factor because it is obtained mainly from the diet.'},
+  {type:'tf',q:'Intrinsic factor is produced by the parietal cells of the gastric glands.',ans:true,exp:'Parietal cells produce intrinsic factor — essential for B12 absorption from small intestine.'},
+  {type:'tf',q:'Folic acid deficiency leads to iron deficiency anemia.',ans:false,exp:'Folic acid deficiency leads to MEGALOBLASTIC anemia due to defective DNA synthesis.'},
+  {type:'tf',q:'ESR is normally higher in females than in males.',ans:true,exp:'Higher in females due to fewer RBCs. Also increases during menstruation and pregnancy.'},
+  {type:'tf',q:'ESR is increased in sickle cell anemia.',ans:false,exp:'Sickle cell anemia is the classic EXCEPTION — ESR does NOT increase in this condition.'},
+  {type:'tf',q:'In aplastic anemia, red bone marrow is reduced and replaced by fatty tissue.',ans:true,exp:'Red marrow → fatty tissue → normocytic normochromic RBCs. Caused by radiation, TB, viral infections.'},
+  {type:'tf',q:'Iron deficiency anemia produces microcytic hypochromic RBCs.',ans:true,exp:'Most common anemia. Inadequate iron → less Hb → small, pale (microcytic, hypochromic) RBCs.'},
+  {type:'tf',q:'In sickle cell anemia, hemoglobin has abnormal alpha chains.',ans:false,exp:'Alpha chains are NORMAL; BETA chains are abnormal → HbSS → crescentic, fragile RBCs.'},
+  {type:'tf',q:'Thalassemia is also known as Cooley\'s anemia or Mediterranean anemia.',ans:true,exp:'Most common in Thailand and Mediterranean countries. β-thalassemia is the most prevalent type.'},
+  {type:'tf',q:'Reticulocyte count in normal adults remains constant at or below 1%.',ans:true,exp:'Newborns: 2–6%. Adults: ≤1%. Increases when erythropoietic activity increases.'},
+  {type:'tf',q:'The surface area of an RBC is approximately 120 sq µ.',ans:true,exp:'Surface area 120 sq µ allows efficient gas exchange. Volume is 85–90 cu µ.'},
+
+  // MCQ (35)
+  {type:'mcq',q:'What is the normal RBC count in adult females?',opts:['3 million/cu mm','4 million/cu mm','4.5 million/cu mm','5 million/cu mm'],ans:2,exp:'Adult females: 4.5 million/cu mm. Adult males: 5 million/cu mm.'},
+  {type:'mcq',q:'What is the peripheral thickness of an RBC?',opts:['1 µ','2.2 µ','3.5 µ','5 µ'],ans:1,exp:'Periphery: 2.2 µ (thick). Center: 1 µ (thin). This is the biconcave structure.'},
+  {type:'mcq',q:'Which of the following organelles is ABSENT in mature RBCs?',opts:['Ribosomes only','Lysosomes only','Mitochondria and Golgi apparatus','Nucleus only'],ans:2,exp:'Mature RBCs lack nucleus, mitochondria, and Golgi apparatus. Energy from glycolysis only.'},
+  {type:'mcq',q:'What is the specific gravity of RBCs?',opts:['1.001–1.01','1.05–1.06','1.092–1.101','1.2–1.3'],ans:2,exp:'Specific gravity of RBCs = 1.092–1.101. Whole blood: 1.052–1.061.'},
+  {type:'mcq',q:'Normal Packed Cell Volume (PCV/hematocrit) in males is:',opts:['30–35%','38–42%','40–45%','50–55%'],ans:2,exp:'Males: 40–45%. Females: 38–42%. Plasma volume is 55%.'},
+  {type:'mcq',q:'Which plasma proteins ACCELERATE rouleaux formation?',opts:['Albumin','Globulin and fibrinogen','Prothrombin','Complement proteins'],ans:1,exp:'Globulin and fibrinogen accelerate rouleaux formation when blood leaves vessels.'},
+  {type:'mcq',q:'After RBC destruction, porphyrin is degraded into:',opts:['Ferritin','Biliverdin','Bilirubin','Urobilin'],ans:2,exp:'Porphyrin → bilirubin → excreted by liver through bile.'},
+  {type:'mcq',q:'Where does RBC production occur during the SECOND trimester of fetal life?',opts:['Yolk sac','Liver (mainly)','Red bone marrow','Lymph nodes'],ans:1,exp:'2nd trimester = Hepatic stage. Liver is main site; some from spleen and lymphoid organs.'},
+  {type:'mcq',q:'Which vitamin is known as the EXTRINSIC FACTOR for RBC maturation?',opts:['Folic acid','Vitamin B6','Vitamin B12 (Cyanocobalamin)','Vitamin C'],ans:2,exp:'Vitamin B12 = extrinsic factor (from diet). Absorbed from small intestine via intrinsic factor.'},
+  {type:'mcq',q:'Intrinsic factor is secreted by which cells?',opts:['Chief (peptic) cells','Parietal cells of gastric glands','G cells','Mucous neck cells'],ans:1,exp:'Parietal cells of gastric glands secrete intrinsic factor essential for B12 absorption.'},
+  {type:'mcq',q:'The average hemoglobin content in blood is:',opts:['10–12 g/dL','12–14 g/dL','14–16 g/dL','18–20 g/dL'],ans:2,exp:'Average Hb: 14–16 g/dL from puberty onwards. At birth: 25 g/dL.'},
+  {type:'mcq',q:'Fetal hemoglobin (HbF) contains:',opts:['Two α-chains and two β-chains','Two α-chains and two γ-chains','Four α-chains','Two β-chains and two γ-chains'],ans:1,exp:'HbF = 2α + 2γ chains. HbA = 2α + 2β chains. HbF has higher O₂ affinity.'},
+  {type:'mcq',q:'Hemoglobin has how many times MORE affinity for carbon monoxide than for oxygen?',opts:['10 times','50 times','100 times','200 times'],ans:3,exp:'Hb has 200× more affinity for CO than O₂ — makes CO extremely dangerous.'},
+  {type:'mcq',q:'Carboxyhemoglobin saturation ABOVE which percentage causes death?',opts:['20%','30%','40%','50%'],ans:3,exp:'Hb saturation by CO >50% → death. 30–40% → convulsions, coma.'},
+  {type:'mcq',q:'Which type of anemia shows NORMOCYTIC NORMOCHROMIC RBCs?',opts:['Iron deficiency anemia','Pernicious anemia','Folic acid deficiency anemia','Acute hemorrhagic anemia'],ans:3,exp:'Acute hemorrhage → normocytic normochromic. Also: aplastic anemia and chronic disease anemia.'},
+  {type:'mcq',q:'Normal sulfhemoglobin level is:',opts:['Less than 1% of total Hb','Less than 3% of total Hb','Less than 5% of total Hb','Less than 10% of total Hb'],ans:0,exp:'Sulfhemoglobin (Hb + H₂S) normal level <1% of total Hb. Methemoglobin <3%.'},
+  {type:'mcq',q:'ESR in pregnancy increases up to what value (from 3rd month to parturition)?',opts:['15 mm/1 hour','25 mm/1 hour','35 mm/1 hour','50 mm/1 hour'],ans:2,exp:'ESR rises to 35 mm/hour during pregnancy due to hemodilution.'},
+  {type:'mcq',q:'Polycythemia vera (primary polycythemia) is characterized by persistent RBC count above:',opts:['7 million/cu mm','10 million/cu mm','14 million/cu mm','20 million/cu mm'],ans:2,exp:'Polycythemia vera: RBC >14 million/cu mm + WBC >24,000/cu mm. Bone marrow malignancy.'},
+  {type:'mcq',q:'Microcytes (smaller RBCs) are found in which condition?',opts:['Megaloblastic anemia','Muscular exercise','Iron deficiency anemia','Decreased osmotic pressure'],ans:2,exp:'Microcytes in: iron deficiency anemia, prolonged forced breathing, increased osmotic pressure.'},
+  {type:'mcq',q:'PCV (hematocrit) is DECREASED in:',opts:['Polycythemia','Dehydration','Cirrhosis of liver','High altitude'],ans:2,exp:'PCV decreases in: anemia, cirrhosis of liver, pregnancy. Increases in polycythemia and dehydration.'},
+  {type:'mcq',q:'In which condition is ESR NOT increased?',opts:['Tuberculosis','Sickle cell anemia','Rheumatoid arthritis','Malignant tumors'],ans:1,exp:'Sickle cell anemia is the classic exception — ESR does NOT increase in this condition.'},
+  {type:'mcq',q:'Secondary polycythemia can be caused by:',opts:['Red bone marrow malignancy','Respiratory disorders like emphysema','Vitamin B12 deficiency','Iron deficiency'],ans:1,exp:'Secondary polycythemia: hypoxia from emphysema, congenital heart disease, CO poisoning → ↑ erythropoietin.'},
+  {type:'mcq',q:'How long does it take for a proerythroblast to become a fully matured RBC?',opts:['3 days','5 days','7 days','14 days'],ans:2,exp:'7 days: Proerythroblast → Early → Intermediate → Late normoblast → Reticulocyte → Matured RBC.'},
+  {type:'mcq',q:'The heme portion of hemoglobin is synthesized from:',opts:['Succinyl-CoA and glycine','Glutamine and alanine','Pyruvate and acetyl-CoA','Glucose-6-phosphate'],ans:0,exp:'Heme is synthesized from succinyl-CoA and glycine in the mitochondria.'},
+  {type:'mcq',q:'Hemoglobin content at birth is approximately:',opts:['14 g/dL','17 g/dL','20 g/dL','25 g/dL'],ans:3,exp:'At birth: 25 g/dL → 3rd month: 20 → 1 year: 17 → puberty onwards: 14–16 g/dL.'},
+  {type:'mcq',q:'Which hemoglobin derivative is formed by the combination of Hb with hydrogen sulfide?',opts:['Carboxyhemoglobin','Methemoglobin','Sulfhemoglobin','Oxyhemoglobin'],ans:2,exp:'Sulfhemoglobin = Hb + H₂S. Caused by sulfonamides. Normal <1% of total Hb.'},
+  {type:'mcq',q:'Which of the following is a STIMULATING FACTOR for erythropoiesis?',opts:['Folic acid','Vitamin B12','Erythropoietin','Intrinsic factor'],ans:2,exp:'Erythropoietin is the main stimulating hormone, secreted by kidneys in response to hypoxia.'},
+  {type:'mcq',q:'Crenation of RBCs (shrinkage) occurs in which solution?',opts:['Hypotonic solution','Hypertonic solution','Isotonic solution','Distilled water'],ans:1,exp:'Crenation = shrinkage in HYPERTONIC conditions. Spherocytosis = swelling in HYPOTONIC conditions.'},
+  {type:'mcq',q:'Thalassemia (Mediterranean anemia) is most commonly found in:',opts:['Sub-Saharan Africa','Thailand and Mediterranean countries','South America','Northern Europe'],ans:1,exp:'Thalassemia is more common in Thailand and Mediterranean countries. β-thalassemia is most common.'},
+  {type:'mcq',q:'Which of the following DECREASES RBC count under physiological conditions?',opts:['Muscular exercise','High altitude','Pregnancy (due to hemodilution)','Emotional stress'],ans:2,exp:'Pregnancy → ↑ ECF volume → ↑ plasma volume → hemodilution → relative ↓ in RBC count.'},
+  {type:'mcq',q:'Where is hemoglobin synthesis INITIATED during erythropoiesis?',opts:['Early normoblast stage','Proerythroblastic stage','Intermediate normoblast stage','Reticulocyte stage'],ans:1,exp:'Hb synthesis starts in proerythroblastic stage; actually APPEARS in intermediate normoblast stage.'},
+  {type:'mcq',q:'Hemolysis of bacterial origin is caused by:',opts:['Cobra venom','Streptococcus and Staphylococcus species','Chloroform','Alcohol'],ans:1,exp:'Bacterial hemolysins: gram-positive bacteria like Streptococcus and Staphylococcus species.'},
+  {type:'mcq',q:'In sickle cell anemia, which polypeptide chains of Hb are abnormal?',opts:['α-chains','β-chains','γ-chains','δ-chains'],ans:1,exp:'In sickle cell anemia, α-chains are NORMAL; β-chains are ABNORMAL → crescentic, fragile RBCs.'},
+  {type:'mcq',q:'Which is a MORPHOLOGICAL type of anemia with LARGE RBCs?',opts:['Normocytic normochromic','Microcytic hypochromic','Macrocytic hypochromic','Normocytic hypochromic'],ans:2,exp:'Macrocytic hypochromic: large RBCs with low color. Seen in megaloblastic/pernicious anemia.'},
+  {type:'mcq',q:'ESR is determined by allowing blood (+ anticoagulant) to stand in a vertical tube. What is measured?',opts:['Volume of WBCs settled','Rate RBCs settle (mm/hour)','Platelet count','Plasma protein ratio'],ans:1,exp:'ESR = rate erythrocytes settle down in mm/hour. RBCs settle by gravity, clear plasma forms above.'},
+];
+
+/* ═══════════════════════════════════════════════
+   FLASH CARDS LOGIC
+═══════════════════════════════════════════════ */
+let fcFilter = 'all';
+let fcDeck = [];
+let fcIndex = 0;
+let fcFlipped = false;
+
+function buildDeck() {
+  if (fcFilter === 'all') fcDeck = [...CARDS];
+  else fcDeck = CARDS.filter(c => c.cat === fcFilter);
+  fcIndex = 0;
+  fcFlipped = false;
+  renderCard();
+}
+
+function renderCard() {
+  const card = fcDeck[fcIndex];
+  document.getElementById('fcCurrent').textContent = fcIndex + 1;
+  document.getElementById('fcTotal').textContent = fcDeck.length;
+  document.getElementById('fcTag').textContent = card.cat === 'blood' ? '🩸 BLOOD' : '🔴 RBCs';
+  document.getElementById('fcQuestion').textContent = card.q;
+  document.getElementById('fcAnswer').textContent = card.a;
+  const cardEl = document.getElementById('fcCard');
+  cardEl.classList.remove('flipped');
+  fcFlipped = false;
+}
+
+function flipCard() {
+  fcFlipped = !fcFlipped;
+  document.getElementById('fcCard').classList.toggle('flipped', fcFlipped);
+}
+
+function nextCard() {
+  fcIndex = (fcIndex + 1) % fcDeck.length;
+  renderCard();
+}
+
+function prevCard() {
+  fcIndex = (fcIndex - 1 + fcDeck.length) % fcDeck.length;
+  renderCard();
+}
+
+function shuffleCards() {
+  for (let i = fcDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [fcDeck[i], fcDeck[j]] = [fcDeck[j], fcDeck[i]];
+  }
+  fcIndex = 0;
+  renderCard();
+}
+
+function resetCards() {
+  buildDeck();
+}
+
+function setFCFilter(f) {
+  fcFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  const btns = document.querySelectorAll('.filter-btn');
+  if (f === 'all') btns[0].classList.add('active');
+  else if (f === 'blood') btns[1].classList.add('active');
+  else btns[2].classList.add('active');
+  buildDeck();
+}
+
+/* ═══════════════════════════════════════════════
+   QUIZ LOGIC
+═══════════════════════════════════════════════ */
+let quizDeck = [];
+let quizIndex = 0;
+let quizCorrect = 0;
+let quizAnswered = false;
+
+function startQuiz(mode) {
+  if (mode === 'all') quizDeck = [...QUIZ_DATA];
+  else if (mode === 'tf') quizDeck = QUIZ_DATA.filter(q => q.type === 'tf');
+  else quizDeck = QUIZ_DATA.filter(q => q.type === 'mcq');
+
+  // shuffle
+  for (let i = quizDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [quizDeck[i], quizDeck[j]] = [quizDeck[j], quizDeck[i]];
+  }
+
+  quizIndex = 0;
+  quizCorrect = 0;
+  quizAnswered = false;
+
+  document.getElementById('quizStart').style.display = 'none';
+  document.getElementById('quizResult').classList.remove('visible');
+  document.getElementById('quizActive').style.display = 'block';
+
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizDeck[quizIndex];
+  quizAnswered = false;
+
+  document.getElementById('qNum').textContent = `Q${quizIndex + 1} / ${quizDeck.length}`;
+  document.getElementById('qScore').textContent = `✓ ${quizCorrect}`;
+  document.getElementById('qProgress').style.width = `${(quizIndex / quizDeck.length) * 100}%`;
+
+  const badge = document.getElementById('qTypeBadge');
+  badge.className = 'quiz-type-badge ' + q.type;
+  badge.textContent = q.type === 'tf' ? 'TRUE / FALSE' : 'MCQ';
+
+  document.getElementById('qQuestion').textContent = q.q;
+  document.getElementById('qExplanation').classList.remove('visible');
+  document.getElementById('qNextBtn').classList.remove('visible');
+
+  const optsEl = document.getElementById('qOptions');
+  optsEl.innerHTML = '';
+
+  if (q.type === 'tf') {
+    const div = document.createElement('div');
+    div.className = 'tf-buttons';
+
+    const tBtn = document.createElement('button');
+    tBtn.className = 'tf-btn true-btn';
+    tBtn.textContent = '✓ TRUE';
+    tBtn.onclick = () => answerTF(true, tBtn, fBtn, q);
+
+    const fBtn = document.createElement('button');
+    fBtn.className = 'tf-btn false-btn';
+    fBtn.textContent = '✗ FALSE';
+    fBtn.onclick = () => answerTF(false, tBtn, fBtn, q);
+
+    div.appendChild(tBtn);
+    div.appendChild(fBtn);
+    optsEl.appendChild(div);
+  } else {
+    const labels = ['A', 'B', 'C', 'D'];
+    const btns = [];
+    q.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${opt}</span>`;
+      btn.onclick = () => answerMCQ(i, btns, q);
+      optsEl.appendChild(btn);
+      btns.push(btn);
+    });
+  }
+}
+
+function answerTF(chosen, tBtn, fBtn, q) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const correct = q.ans;
+  const isCorrect = chosen === correct;
+  if (isCorrect) quizCorrect++;
+
+  tBtn.disabled = true;
+  fBtn.disabled = true;
+
+  if (chosen === true) {
+    tBtn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (!isCorrect) fBtn.classList.add('correct');
+  } else {
+    fBtn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (!isCorrect) tBtn.classList.add('correct');
+  }
+
+  showExplanation(isCorrect, q.exp);
+}
+
+function answerMCQ(chosen, btns, q) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const isCorrect = chosen === q.ans;
+  if (isCorrect) quizCorrect++;
+
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === chosen && isCorrect) b.classList.add('correct');
+    else if (i === chosen && !isCorrect) b.classList.add('wrong');
+    else if (i === q.ans) b.classList.add('show-correct');
+  });
+
+  showExplanation(isCorrect, q.exp);
+}
+
+function showExplanation(correct, text) {
+  const el = document.getElementById('qExplanation');
+  el.innerHTML = `<strong>${correct ? '✓ Correct!' : '✗ Incorrect'}</strong> — ${text}`;
+  el.classList.add('visible');
+  document.getElementById('qNextBtn').textContent =
+    quizIndex + 1 < quizDeck.length ? 'Next Question →' : 'See Results';
+  document.getElementById('qNextBtn').classList.add('visible');
+  document.getElementById('qScore').textContent = `✓ ${quizCorrect}`;
+}
+
+function nextQuestion() {
+  quizIndex++;
+  if (quizIndex >= quizDeck.length) {
+    showResult();
+  } else {
+    renderQuestion();
+    document.querySelector('.main').scrollTop = 0;
+  }
+}
+
+function showResult() {
+  document.getElementById('quizActive').style.display = 'none';
+  const result = document.getElementById('quizResult');
+  result.classList.add('visible');
+  const pct = Math.round((quizCorrect / quizDeck.length) * 100);
+  document.getElementById('rScore').textContent = pct + '%';
+  const wrong = quizDeck.length - quizCorrect;
+  document.getElementById('rCorrect').textContent = `✓ ${quizCorrect} Correct`;
+  document.getElementById('rWrong').textContent = `✗ ${wrong} Wrong`;
+
+  let label = '';
+  if (pct >= 90) label = 'Excellent! You\'re ready for the exam 🎯';
+  else if (pct >= 75) label = 'Good work — review the missed questions 📖';
+  else if (pct >= 60) label = 'Keep studying — you\'re getting there 💪';
+  else label = 'Review the material and try again 🔁';
+  document.getElementById('rLabel').textContent = label;
+}
+
+function restartQuiz() {
+  document.getElementById('quizResult').classList.remove('visible');
+  document.getElementById('quizStart').style.display = 'block';
+  document.querySelector('.main').scrollTop = 0;
+}
+
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  document.querySelector('.main').scrollTop = 0;
+
+  const labels = { fc: 'Flash Cards', quiz: 'Quiz' };
+  document.getElementById('sectionBadge').textContent = labels[id];
+}
+
+/* ── INIT ── */
+buildDeck();
+</script>
+
+</body>
+</html>
